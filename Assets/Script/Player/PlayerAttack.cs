@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
+    [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] private Transform firePoint;
+
     private PlayerInputActions inputActions;
 
     void Awake()
@@ -24,6 +27,7 @@ public class PlayerAttack : MonoBehaviour
         if (inputActions.Player.Attack.WasPressedThisFrame())
         {
             Debug.Log("Attack");
+            Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
         }
     }
 }
