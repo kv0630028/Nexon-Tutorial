@@ -4,6 +4,7 @@ public class PlayerBullet : MonoBehaviour
 {
     [SerializeField] private float speed = 10f;
     [SerializeField] private float lifeTime = 3f;
+    [SerializeField] private float damage = 25f;
 
     private Rigidbody2D bulletRb;
 
@@ -21,5 +22,15 @@ public class PlayerBullet : MonoBehaviour
     void OnBecameInvisible()
     {
         Destroy(gameObject);
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        EnemyHealth enemyHealth = other.GetComponent<EnemyHealth>();
+        if (enemyHealth != null)
+        {
+            enemyHealth.TakeDamage(damage);
+            Destroy(gameObject);
+        }
     }
 }
