@@ -6,6 +6,10 @@ public class PlayerHealth : MonoBehaviour
 
     private float currentHp;
 
+    public float CurrentHp => currentHp;
+    public float MaxHp => maxHp;
+    public bool IsDead => currentHp <= 0f;
+
     void Awake()
     {
         currentHp = maxHp;
