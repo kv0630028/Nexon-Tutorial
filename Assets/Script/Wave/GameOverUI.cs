@@ -25,43 +25,88 @@ public class GameOverUI : MonoBehaviour
         playerHealth = Object.FindFirstObjectByType<PlayerHealth>();
         gameOverTextObject = CreateGameOverText();
         gameOverTextObject.SetActive(false);
+
+        SubscribeToPlayerHealth();
     }
 
     void Update()
     {
-        if (playerHealth == null)
-        {
-            playerHealth = Object.FindFirstObjectByType<PlayerHealth>();
-        }
-
-        if (playerHealth == null || gameOverTextObject == null)
+        if (playerHealth != null)
         {
             return;
         }
 
-        if (playerHealth.IsDead)
-        {
-            gameOverTextObject.SetActive(true);
-            Time.timeScale = 0f;
-        }
-        else
+        playerHealth = Object.FindFirstObjectByType<PlayerHealth>();
+
+        if (playerHealth != null)
         {
             gameOverTextObject.SetActive(false);
+            Time.timeScale = 1f;
+
+            SubscribeToPlayerHealth();
         }
+    }
+
+    void OnDestroy()
+    {
+        UnsubscribeFromPlayerHealth();
+    }
+
+    private void SubscribeToPlayerHealth()
+    {
+        if (playerHealth == null)
+        {
+            return;
+        }
+
+        playerHealth.OnDeath += ShowGameOver;
+    }
+
+    private void UnsubscribeFromPlayerHealth()
+    {
+        if (playerHealth == null)
+        {
+            return;
+        }
+
+        playerHealth.OnDeath -= ShowGameOver;
+    }
+
+    private void ShowGameOver()
+    {
+        if (gameOverTextObject == null)
+        {
+            return;
+        }
+
+        gameOverTextObject.SetActive(true);
+        Time.timeScale = 0f;
     }
 
     private GameObject CreateGameOverText()
     {
         Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+
         if (canvas == null)
         {
-            GameObject canvasObject = new GameObject("Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            GameObject canvasObject = new GameObject(
+                "Canvas",
+                typeof(Canvas),
+                typeof(CanvasScaler),
+                typeof(GraphicRaycaster)
+            );
+
             canvas = canvasObject.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         }
+
         DontDestroyOnLoad(canvas.gameObject);
 
-        GameObject textObject = new GameObject("GameOverText", typeof(TextMeshProUGUI));
+        GameObject textObject = new GameObject(
+            "GameOverText",
+            typeof(TextMeshProUGUI)
+        );
+
         textObject.transform.SetParent(canvas.transform, false);
 
         RectTransform rect = textObject.GetComponent<RectTransform>();

@@ -3,6 +3,7 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 5f;
+
     private Vector2 moveInput;
     private Rigidbody2D playerRb;
 
@@ -24,11 +25,9 @@ public class PlayerMovement : MonoBehaviour
         inputActions.Disable();
     }
 
-    // Update is called once per frame
     void Update()
     {
         moveInput = inputActions.Player.Move.ReadValue<Vector2>();
-        Debug.Log($"moveInput: {moveInput}");
     }
 
     void FixedUpdate()

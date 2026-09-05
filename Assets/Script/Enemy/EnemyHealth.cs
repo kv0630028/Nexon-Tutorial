@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class EnemyHealth : MonoBehaviour
@@ -5,24 +6,30 @@ public class EnemyHealth : MonoBehaviour
     [SerializeField] private float maxHp = 100f;
 
     private float currentHp;
-    private ScoreManager scoreManager;
+
+    public float CurrentHp => currentHp;
+    public float MaxHp => maxHp;
+    public bool IsDead => currentHp <= 0f;
+
+    public event Action<EnemyHealth> OnDeath;
 
     void Awake()
     {
         currentHp = maxHp;
-        scoreManager = Object.FindFirstObjectByType<ScoreManager>();
     }
 
     public void TakeDamage(float damage)
     {
-        currentHp -= damage;
-
-        if (currentHp <= 0f)
+        if (IsDead)
         {
-            if (scoreManager != null)
-            {
-                scoreManager.AddScore(scoreManager.EnemyKillScore);
-            }
+            return;
+        }
+
+        currentHp = Mathf.Max(currentHp - damage, 0f);
+
+        if (IsDead)
+        {
+            OnDeath?.Invoke(this);
             Destroy(gameObject);
         }
     }

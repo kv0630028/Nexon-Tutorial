@@ -24,35 +24,87 @@ public class PlayerHealthUI : MonoBehaviour
 
         playerHealth = Object.FindFirstObjectByType<PlayerHealth>();
         hpText = CreateHpText();
+
+        SubscribeToPlayerHealth();
     }
 
     void Update()
     {
-        if (playerHealth == null)
-        {
-            playerHealth = Object.FindFirstObjectByType<PlayerHealth>();
-        }
-
-        if (playerHealth == null || hpText == null)
+        if (playerHealth != null)
         {
             return;
         }
 
-        hpText.text = $"HP: {playerHealth.CurrentHp} / {playerHealth.MaxHp}";
+        playerHealth = Object.FindFirstObjectByType<PlayerHealth>();
+
+        if (playerHealth != null)
+        {
+            UpdateHpText(playerHealth.CurrentHp, playerHealth.MaxHp);
+            SubscribeToPlayerHealth();
+        }
+    }
+
+    void OnDestroy()
+    {
+        UnsubscribeFromPlayerHealth();
+    }
+
+    private void SubscribeToPlayerHealth()
+    {
+        if (playerHealth == null)
+        {
+            return;
+        }
+
+        playerHealth.OnHealthChanged += UpdateHpText;
+
+        UpdateHpText(playerHealth.CurrentHp, playerHealth.MaxHp);
+    }
+
+    private void UnsubscribeFromPlayerHealth()
+    {
+        if (playerHealth == null)
+        {
+            return;
+        }
+
+        playerHealth.OnHealthChanged -= UpdateHpText;
+    }
+
+    private void UpdateHpText(float currentHp, float maxHp)
+    {
+        if (hpText == null)
+        {
+            return;
+        }
+
+        hpText.text = $"HP: {currentHp} / {maxHp}";
     }
 
     private TextMeshProUGUI CreateHpText()
     {
         Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+
         if (canvas == null)
         {
-            GameObject canvasObject = new GameObject("Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            GameObject canvasObject = new GameObject(
+                "Canvas",
+                typeof(Canvas),
+                typeof(CanvasScaler),
+                typeof(GraphicRaycaster)
+            );
+
             canvas = canvasObject.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         }
+
         DontDestroyOnLoad(canvas.gameObject);
 
-        GameObject textObject = new GameObject("PlayerHpText", typeof(TextMeshProUGUI));
+        GameObject textObject = new GameObject(
+            "PlayerHpText",
+            typeof(TextMeshProUGUI)
+        );
+
         textObject.transform.SetParent(canvas.transform, false);
 
         RectTransform rect = textObject.GetComponent<RectTransform>();

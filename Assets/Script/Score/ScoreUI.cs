@@ -24,6 +24,13 @@ public class ScoreUI : MonoBehaviour
 
         scoreManager = Object.FindFirstObjectByType<ScoreManager>();
         scoreText = CreateScoreText();
+
+        SubscribeToScoreManager();
+    }
+
+    void OnDestroy()
+    {
+        UnsubscribeFromScoreManager();
     }
 
     void Update()
@@ -31,28 +38,65 @@ public class ScoreUI : MonoBehaviour
         if (scoreManager == null)
         {
             scoreManager = Object.FindFirstObjectByType<ScoreManager>();
+            SubscribeToScoreManager();
         }
+    }
 
-        if (scoreManager == null || scoreText == null)
+    private void SubscribeToScoreManager()
+    {
+        if (scoreManager == null)
         {
             return;
         }
 
-        scoreText.text = $"Score: {scoreManager.CurrentScore}";
+        scoreManager.OnScoreChanged += UpdateScore;
+        UpdateScore(scoreManager.CurrentScore);
+    }
+
+    private void UnsubscribeFromScoreManager()
+    {
+        if (scoreManager == null)
+        {
+            return;
+        }
+
+        scoreManager.OnScoreChanged -= UpdateScore;
+    }
+
+    private void UpdateScore(int score)
+    {
+        if (scoreText == null)
+        {
+            return;
+        }
+
+        scoreText.text = $"Score: {score}";
     }
 
     private TextMeshProUGUI CreateScoreText()
     {
         Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+
         if (canvas == null)
         {
-            GameObject canvasObject = new GameObject("Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            GameObject canvasObject = new GameObject(
+                "Canvas",
+                typeof(Canvas),
+                typeof(CanvasScaler),
+                typeof(GraphicRaycaster)
+            );
+
             canvas = canvasObject.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         }
+
         DontDestroyOnLoad(canvas.gameObject);
 
-        GameObject textObject = new GameObject("ScoreText", typeof(TextMeshProUGUI));
+        GameObject textObject = new GameObject(
+            "ScoreText",
+            typeof(TextMeshProUGUI)
+        );
+
         textObject.transform.SetParent(canvas.transform, false);
 
         RectTransform rect = textObject.GetComponent<RectTransform>();

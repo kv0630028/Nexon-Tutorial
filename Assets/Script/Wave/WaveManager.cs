@@ -9,16 +9,21 @@ public class WaveManager : MonoBehaviour
     [SerializeField] private float maxSpawnDistance = 8f;
 
     private Transform playerTransform;
+    private ScoreManager scoreManager;
+
     private int currentWave;
     private readonly List<GameObject> aliveEnemies = new List<GameObject>();
 
     void Awake()
     {
         GameObject player = GameObject.FindGameObjectWithTag("Player");
+
         if (player != null)
         {
             playerTransform = player.transform;
         }
+
+        scoreManager = Object.FindFirstObjectByType<ScoreManager>();
     }
 
     void Start()
@@ -29,18 +34,6 @@ public class WaveManager : MonoBehaviour
 
     void Update()
     {
-        if (aliveEnemies.Count == 0)
-        {
-            return;
-        }
-
-        aliveEnemies.RemoveAll(enemy => enemy == null);
-
-        if (aliveEnemies.Count == 0)
-        {
-            currentWave++;
-            StartWave();
-        }
     }
 
     void StartWave()
@@ -55,16 +48,53 @@ public class WaveManager : MonoBehaviour
         for (int i = 0; i < enemyCount; i++)
         {
             Vector2 spawnPosition = GetRandomSpawnPosition();
-            GameObject enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
+
+            GameObject enemy = Instantiate(
+                enemyPrefab,
+                spawnPosition,
+                Quaternion.identity
+            );
+
             aliveEnemies.Add(enemy);
+
+            EnemyHealth enemyHealth = enemy.GetComponent<EnemyHealth>();
+
+            if (enemyHealth != null)
+            {
+                enemyHealth.OnDeath += HandleEnemyDeath;
+            }
+        }
+    }
+
+    private void HandleEnemyDeath(EnemyHealth enemyHealth)
+    {
+        aliveEnemies.Remove(enemyHealth.gameObject);
+
+        enemyHealth.OnDeath -= HandleEnemyDeath;
+
+        if (scoreManager != null)
+        {
+            scoreManager.AddScore(scoreManager.EnemyKillScore);
+        }
+
+        if (aliveEnemies.Count == 0)
+        {
+            currentWave++;
+            StartWave();
         }
     }
 
     Vector2 GetRandomSpawnPosition()
     {
         float angle = Random.Range(0f, Mathf.PI * 2f);
-        float distance = Random.Range(minSpawnDistance, maxSpawnDistance);
-        Vector2 offset = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * distance;
+        float distance = Random.Range(
+            minSpawnDistance,
+            maxSpawnDistance
+        );
+
+        Vector2 offset =
+            new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * distance;
+
         return (Vector2)playerTransform.position + offset;
     }
 }
