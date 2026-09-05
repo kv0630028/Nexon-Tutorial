@@ -20,6 +20,8 @@ public class GameOverUI : MonoBehaviour
 
     void Awake()
     {
+        DontDestroyOnLoad(gameObject);
+
         playerHealth = Object.FindFirstObjectByType<PlayerHealth>();
         gameOverTextObject = CreateGameOverText();
         gameOverTextObject.SetActive(false);
@@ -27,6 +29,11 @@ public class GameOverUI : MonoBehaviour
 
     void Update()
     {
+        if (playerHealth == null)
+        {
+            playerHealth = Object.FindFirstObjectByType<PlayerHealth>();
+        }
+
         if (playerHealth == null || gameOverTextObject == null)
         {
             return;
@@ -36,6 +43,10 @@ public class GameOverUI : MonoBehaviour
         {
             gameOverTextObject.SetActive(true);
             Time.timeScale = 0f;
+        }
+        else
+        {
+            gameOverTextObject.SetActive(false);
         }
     }
 
@@ -48,6 +59,7 @@ public class GameOverUI : MonoBehaviour
             canvas = canvasObject.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         }
+        DontDestroyOnLoad(canvas.gameObject);
 
         GameObject textObject = new GameObject("GameOverText", typeof(TextMeshProUGUI));
         textObject.transform.SetParent(canvas.transform, false);

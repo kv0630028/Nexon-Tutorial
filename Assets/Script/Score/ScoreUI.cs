@@ -20,12 +20,19 @@ public class ScoreUI : MonoBehaviour
 
     void Awake()
     {
+        DontDestroyOnLoad(gameObject);
+
         scoreManager = Object.FindFirstObjectByType<ScoreManager>();
         scoreText = CreateScoreText();
     }
 
     void Update()
     {
+        if (scoreManager == null)
+        {
+            scoreManager = Object.FindFirstObjectByType<ScoreManager>();
+        }
+
         if (scoreManager == null || scoreText == null)
         {
             return;
@@ -43,6 +50,7 @@ public class ScoreUI : MonoBehaviour
             canvas = canvasObject.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         }
+        DontDestroyOnLoad(canvas.gameObject);
 
         GameObject textObject = new GameObject("ScoreText", typeof(TextMeshProUGUI));
         textObject.transform.SetParent(canvas.transform, false);

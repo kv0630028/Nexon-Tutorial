@@ -20,12 +20,19 @@ public class PlayerHealthUI : MonoBehaviour
 
     void Awake()
     {
+        DontDestroyOnLoad(gameObject);
+
         playerHealth = Object.FindFirstObjectByType<PlayerHealth>();
         hpText = CreateHpText();
     }
 
     void Update()
     {
+        if (playerHealth == null)
+        {
+            playerHealth = Object.FindFirstObjectByType<PlayerHealth>();
+        }
+
         if (playerHealth == null || hpText == null)
         {
             return;
@@ -43,6 +50,7 @@ public class PlayerHealthUI : MonoBehaviour
             canvas = canvasObject.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         }
+        DontDestroyOnLoad(canvas.gameObject);
 
         GameObject textObject = new GameObject("PlayerHpText", typeof(TextMeshProUGUI));
         textObject.transform.SetParent(canvas.transform, false);
